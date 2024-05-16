@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+    <link rel="icon" href="assets/robot.ico" />
+    <title>Robot Control</title>
+    <!-- bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <!-- ros -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/eventemitter2/lib/eventemitter2.min.js"></script>
+    <script type="text/javascript" src="https://s3.eu-west-1.amazonaws.com/rosject.io/js/roslib.min.js"></script>
+    <!-- model -->
+    <script type="text/javascript" src="scripts/lib/three.js"></script>
+    <script type="text/javascript" src="scripts/lib/colladaloader.js"></script>
+    <script type="text/javascript" src="scripts/lib/colladaloader2.js"></script>
+    <script type="text/javascript" src="scripts/lib/stlloader.js"></script>
+    <script type="text/javascript" src="scripts/lib/ros3d.js"></script>
+    <!-- camera -->
+    <script type="text/javascript" src="scripts/lib/mjpegcanvas.js"></script>
+    <!-- map -->
+    <script type="text/javascript" src="scripts/lib/easel.js"></script>
+    <script type="text/javascript" src="scripts/lib/ros2d.js"></script>
+    <!-- vuejs -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+    <!-- css stylesheet -->
+    <link rel="stylesheet" href="styles/app.css" />
+</head>
+
+<body>
+    <div id="app">
+        <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+            <!-- robot name -->
+            <a class="navbar-brand p-0 bi bi-robot" href="#"> {{ robotName }}</a>
+            <div class="collapse navbar-collapse">
+                <!-- connection status -->
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link text-danger p-0 bi bi-wifi-off navbar-icon-custom" v-if="!isConnected"></a>
+                        <a class="nav-link text-success p-0 bi bi-wifi navbar-icon-custom" v-else></a>
+                    </li>
+                </ul>
+                <!-- input form -->
+                <form class="form-inline form-inline-custom mt-2 mt-md-0">
+                    <!-- input box -->
+                    <div class="input-group form-input-custom">
+                        <input class="form-control mr-sm-2" type="text" v-model="rosbridgeAddress"
+                            placeholder="ROS Bridge Address" aria-label="Search" />
+                    </div>
+                    <!-- submit button -->
+                    <button class="btn btn-outline-danger my-2 my-sm-0" :disabled="isLoading" @click="disconnect"
+                        v-if="isConnected" type="button">
+                        Disconnect
+                    </button>
+                    <button class="btn btn-outline-success my-2 my-sm-0" :disabled="isLoading" @click="connect" v-else
+                        type="button">
+                        Connect
+                    </button>
+                </form>
+            </div>
+        </nav>
+        <!-- main view -->
+        <div class="container-fluid p-0">
+            <!-- first row -->
+            <div class="d-md-flex flex-md-equal w-100 my-md-3 pl-md-3">
+                <!-- first box -->
+                <div class="bg-dark mr-md-3 p-3 box-custom-row1">
+                    <div class="row ml-0 mr-0 text-white align-items-center">
+                        <h5 class="text-left bi bi-sliders">
+                            Parameter Server
+                        </h5>
+                        <h6 class="pl-3">/parameter_events</h6>
+                    </div>
+                    <!-- slider -->
+                    <div class="pt-3 pb-2 text-left text-white rounded">
+                        <!-- Maximum Distance -->
+                        <div class="w-100 reduced-container">
+                            <div class="d-flex reduced-inner">
+                                <label for="parameter1" class="form-label flex-grow-1">
+                                    Maximum Distance
+                                </label>
+                                <span class="ml-auto">{{ parameters.maxDistance.value }} m</span>
+                            </div>
+                            <input type="range" class="form-range w-100 reduced-range" id="parameter1" min="0" max="1"
+                                step="0.01" v-model.number="parameters.maxDistance.value">
+                        </div>
+                        <!-- Minimum Distance -->
+                        <div class="w-100 reduced-container">
+                            <div class="d-flex reduced-inner">
+                                <label for="parameter2" class="form-label flex-grow-1">
+                                    Minimum Distance
+                                </label>
+                                <span class="ml-auto">{{ parameters.minDistance.value }} m</span>
+                            </div>
+                            <input type="range" class="form-range w-100 reduced-range" id="parameter2" min="0" max="1"
+                                step="0.01" v-model.number="parameters.minDistance.value">
+                        </div>
+                        <!-- Angle Tolerance -->
+                        <div class="w-100 reduced-container">
+                            <div class="d-flex reduced-inner">
+                                <label for="parameter5" class="form-label flex-grow-1">
+                                    Angle Tolerance
+                                </label>
+                                <span class="ml-auto">{{ parameters.angleTolerance.value }} deg</span>
+                            </div>
+                            <input type="range" class="form-range w-100 reduced-range" id="parameter5" min="0" max="100"
+                                step="5" v-model.number="parameters.angleTolerance.value">
+                        </div>
+                        <!-- Maximum Cluster Points -->
+                        <div class="w-100 reduced-container">
+                            <div class="d-flex reduced-inner">
+                                <label for="parameter4" class="form-label flex-grow-1">
+                                    Maximum Cluster Points
+                                </label>
+                                <span class="ml-auto">{{ parameters.maxPoints.value }}</span>
+                            </div>
+                            <input type="range" class="form-range w-100 reduced-range" id="parameter4" min="0" max="500"
+                                step="1" v-model.number="parameters.maxPoints.value">
+                        </div>
+                        <!-- Minimum Cluster Points -->
+                        <div class="w-100 reduced-container">
+                            <div class="d-flex reduced-inner">
+                                <label for="parameter3" class="form-label flex-grow-1">
+                                    Minimum Cluster Points
+                                </label>
+                                <span class="ml-auto">{{ parameters.minPoints.value }}</span>
+                            </div>
+                            <input type="range" class="form-range w-100 reduced-range" id="parameter3" min="0" max="500"
+                                step="1" v-model.number="parameters.minPoints.value">
+                        </div>
+                        <!-- Marker Duration -->
+                        <div class="w-100 reduced-container">
+                            <div class="d-flex reduced-inner">
+                                <label for="parameter5" class="form-label flex-grow-1">
+                                    Marker Duration
+                                </label>
+                                <span class="ml-auto">{{ parameters.markerDuration.value }} sec</span>
+                            </div>
+                            <input type="range" class="form-range w-100 reduced-range" id="parameter5" min="0" max="10"
+                                step="0.5" v-model.number="parameters.markerDuration.value">
+                        </div>
+                    </div>
+                    <!-- min row -->
+                    <div class="row justify-content-center">
+                        <div class="w-100">
+                            <div class="form-row align-items-center justify-content-center">
+                                <!-- submit button -->
+                                <div class="col-auto my-1">
+                                    <button type="button"
+                                        :class="['btn', 'fixed-width-btn', (isParameterServiceBusy) ? 'btn-danger' : 'btn-success']"
+                                        :disabled="!isConnected || isParameterServiceBusy" @click="getParameters">
+                                        Get Parameter
+                                    </button>
+                                </div>
+                                <div class="col-auto my-1">
+                                    <button type="button"
+                                        :class="['btn', 'fixed-width-btn', (isParameterServiceBusy) ? 'btn-danger' : 'btn-success']"
+                                        :disabled="!isConnected || isParameterServiceBusy" @click="setParameters">
+                                        Set Parameter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- second box -->
+                <div class="bg-dark mr-md-3 p-3 box-custom-row1">
+                    <div class="row pl-3 text-white align-items-center">
+                        <h5 class="text-left bi bi-trash">
+                            Trash Table
+                        </h5>
+                        <h6 class="pl-3">/table</h6>
+                    </div>
+                    <!-- canvas -->
+                    <div ref="idTableCanvasContainer" class="bg-light rounded mt-1 mb-2 col-sm canvas-container">
+                        <canvas ref="idTableCanvas" class="canvas-custom"></canvas>
+                    </div>
+                    <!-- min row -->
+                    <div class="row justify-content-center">
+                        <div class="w-100">
+                            <div class="form-row align-items-center justify-content-center">
+                                <!-- submit button -->
+                                <button type="button" class="btn btn-outline-danger mr-2" :disabled="!isConnected"
+                                    @click="canvasScale -= 10">
+                                    <i class="bi bi-zoom-out"></i>
+                                </button>
+                                <div class="col-auto my-1">
+                                    <button type="button" class="btn btn-danger fixed-width-btn"
+                                        :disabled="!isConnected" @click="clearTableCanvas">
+                                        Clear Canvas
+                                    </button>
+                                </div>
+                                <div class="col-auto my-1">
+                                    <button type="button"
+                                        :class="['btn', 'fixed-width-btn', (tableService.isServiceBusy) ? 'btn-danger' : 'btn-success']"
+                                        :disabled="!isConnected" @click="callTableService">
+                                        Find Table
+                                    </button>
+                                </div>
+                                <button type="button" class="btn btn-outline-success ml-2" :disabled="!isConnected"
+                                    @click="canvasScale += 10">
+                                    <i class="bi bi-zoom-in"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- third box -->
+                <div class="bg-dark mr-md-3 p-3 box-custom-row1">
+                    <div class="row pl-3 text-white align-items-center">
+                        <h5 class="text-left bi bi-geo-alt-fill">
+                            Robot Localization
+                        </h5>
+                        <h6 class="pl-3">/map</h6>
+                    </div>
+                    <!-- canvas -->
+                    <div ref="idMapCanvasContainer"
+                        :class="['canvas-container', 'rounded', 'mt-1', 'mb-2', 'col-sm', (showMap) ? 'canvas-map-background' : 'bg-dark']">
+                        <canvas ref="idMapCanvas" class="canvas-custom"></canvas>
+                    </div>
+                    <!-- min row -->
+                    <div class="row justify-content-center">
+                        <div class="w-100">
+                            <div class="form-row align-items-center justify-content-center">
+                                <!-- dropdown -->
+                                <div class="col-auto">
+                                    <select v-on:change="handleCommandRequest($event)" class="custom-select mr-sm-4">
+                                        <option selected disabled hidden>Select Command</option>
+                                        <option>Patrol</option>
+                                        <option>Go Home</option>
+                                        <option>Go Drop</option>
+                                        <option>Stop</option>
+                                    </select>
+                                </div>
+                                <!-- submit button -->
+                                <div class="col-auto my-1">
+                                    <button type="button"
+                                        :class="['btn', 'fixed-width-btn2', (controlService.isServiceBusy) ? 'btn-danger' : 'btn-success']"
+                                        :disabled="!isConnected || controlService.isServiceBusy"
+                                        @click="callControlService">
+                                        Execute
+                                    </button>
+                                </div>
+                                <!-- submit button -->
+                                <div class="col-auto my-1">
+                                    <!-- Show this button when serviceRequest is true -->
+                                    <button type="button" class="btn btn-danger fixed-width-btn2"
+                                        :disabled="!isConnected || elevatorService.isServiceBusy"
+                                        v-if="!elevatorService.serviceRequest" @click="callElevatorService">
+                                        Elevator Down
+                                    </button>
+                                    <!-- Show this button when serviceRequest is false -->
+                                    <button type="button" class="btn btn-success fixed-width-btn2"
+                                        :disabled="!isConnected || elevatorService.isServiceBusy" v-else
+                                        @click="callElevatorService">
+                                        Elevator Up
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- second row -->
+            <div class="d-md-flex flex-md-equal w-100 my-md-3 pl-md-3">
+                <!-- first box -->
+                <div class="bg-dark mr-md-3 pl-3 pr-3 pt-3 pb-1 box-custom-row2">
+                    <div class="row ml-0 mr-0 text-white align-items-center border-bottom">
+                        <h5 class="text-left bi bi-terminal-fill">
+                            Terminal
+                        </h5>
+                        <h6 class="pl-3">/rosout</h6>
+                    </div>
+                    <div class="terminal-custom pt-1 text-left text-white">
+                        <div v-for="log in logArray">
+                            <span :class="getLogClass(log.level)">$ {{ log.msg }}</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- second box -->
+                <div class="d-flex justify-content-center align-items-center mr-md-3 p-3 box-custom-row2">
+                    <div class="drag-start-zone" id="idDragStartZone" @mousedown="joystickStartDrag"
+                        @mousemove="joystickDoDrag"></div>
+                    <div class="drag-circle" :style="draggingStyle"></div>
+                </div>
+                <!-- third box -->
+                <div class="bg-light-custom mr-md-3 p-3 box-custom-row2">
+                    <!-- first min row -->
+                    <div class="row m-0 justify-content-center">
+                        <div class="w-100">
+                            <div class="d-flex align-items-center justify-content-between mt-2 mb-2">
+                                <!-- Progress bar -->
+                                <div class="progress progress-bar-custom" @click="resetActionClient">
+                                    <div ref="progressBar" class="progress-bar" :class="progressBarClasses"
+                                        role="progressBarProgress" :aria-valuenow="progress" aria-valuemin="0"
+                                        aria-valuemax="100" :style="progressBarStyle">
+                                        <span :class="{'no-goal-text': !dockAction.status.active}">
+                                            {{ progressBarText }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <!-- submit button -->
+                                <button type="button" class="btn btn-danger fixed-width-btn2" :disabled="!isConnected"
+                                    v-if="dockAction.status.button" @click="cancelDockGoal">
+                                    Cancel
+                                </button>
+                                <button type="button" class="btn btn-success fixed-width-btn2" :disabled="!isConnected"
+                                    v-else @click="sendDockGoal">
+                                    Dock Robot
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- second min row -->
+                    <div class="row m-0 mt-3">
+                        <!-- first min box -->
+                        <div class="bg-dark col-sm text-left m-1 p-2 rounded">
+                            <h6 class="text-center text-white">Joystick</h6>
+                            <p class="bg-light rounded">
+                                <span class="ml-2"><b>move : </b>{{ joystick.x.toFixed(3) }}</span>
+                                <br />
+                                <span class="ml-2"><b>rotate : </b>{{ joystick.z.toFixed(3) }}</span>
+                            </p>
+                        </div>
+                        <!-- second min box -->
+                        <div class="bg-dark col-sm text-left m-1 p-2 rounded">
+                            <h6 class="text-center text-white">Velocity</h6>
+                            <p class="bg-light rounded">
+                                <span class="ml-2"><b>linear.x : </b>{{ velocity.x.toFixed(2) }}</span>
+                                <br />
+                                <span class="ml-2"><b>angular.z : </b>{{ velocity.z.toFixed(2) }}</span>
+                            </p>
+                        </div>
+                        <!-- third min box -->
+                        <div class="bg-dark col-sm text-left m-1 p-2 rounded">
+                            <h6 class="text-center text-white">Odometry</h6>
+                            <p class="bg-light rounded">
+                                <span class="ml-2"><b>position.x : </b>{{ position.x.toFixed(2) }}</span>
+                                <br />
+                                <span class="ml-2"><b>position.y : </b>{{ position.y.toFixed(2) }}</span>
+                                <br />
+                                <span class="ml-2"><b>position.z : </b>{{ position.z.toFixed(2) }}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- footer -->
+    <footer class="footer">
+        <div class="container footer-custom">
+            <span class="text-muted">Abhishek Verma © 2023-2024</span>
+        </div>
+    </footer>
+    <!-- javascript -->
+    <script type="text/javascript">
+        // bug : isLoading app.js using <script type="text/javascript" src="scripts/app.js">
+        // will having caching-related problems app.js with a Date.now() in the URL
+        var script = document.createElement("script");
+        script.type = "text/javascript";
+        script.src = "scripts/app.js?v=11." + Date.now();
+        document.head.appendChild(script);
+    </script>
+</body>
+
+</html>
