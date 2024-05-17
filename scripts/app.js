@@ -76,7 +76,7 @@ var app = new Vue({
 
     // progress
     progress: null,
-    progress_count: 1,
+    progress_count: 0,
 
     // commands
     commands: [
@@ -140,7 +140,7 @@ var app = new Vue({
           this.progress = 100;
           return this.progress;
         } else {
-          this.progress_count = this.progress_count + this.dockAction.feedback.stage;
+          this.progress_count = this.dockAction.feedback.stage + 1;
           this.progress = this.progress_count * 15;
           return this.progress;
         }
@@ -829,7 +829,7 @@ var app = new Vue({
         feedback: { stage: 0, status: 0, success: null, message: "" },
       };
       this.progress = 0;
-      this.progress_count = 1;
+      this.progress_count = 0;
       this.logMessage(0, "The reset of the action client state has been successfull.");
     },
 
