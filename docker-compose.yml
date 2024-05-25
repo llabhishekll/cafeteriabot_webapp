@@ -1,0 +1,20 @@
+version: "3"
+
+services:
+  webapp:
+    image: "llabhishekll/cafeteriabot_project:ros2-webapp"
+    networks:
+      - default
+    environment:
+      - "ROS_DOMAIN_ID=0"
+      - "RMW_IMPLEMENTATION=rmw_cyclonedds_cpp"
+    ports:
+      - "7000:7000"
+      - "9090:9090"
+      - "11315:11315"
+      - "20001:20001"
+    tty: true
+
+networks:
+  default:
+    driver: bridge
