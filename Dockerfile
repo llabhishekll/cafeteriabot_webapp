@@ -1,5 +1,5 @@
 # base image for docker
-FROM osrf/ros:humble-desktop-focal
+FROM osrf/ros:humble-desktop-full
 
 # set environment variable
 ENV DEBIAN_FRONTEND=noninteractive
@@ -14,7 +14,7 @@ RUN apt-get install -y \
     ros-humble-rosbridge-server
 
 # setup workspace
-RUN git clone -b ros2 https://github.com/llabhishekll/cafeteriabot_project.git /ros2_ws/src/
+RUN git clone -b main https://github.com/llabhishekll/cafeteriabot_webapp.git /ros2_ws/src/
 RUN /bin/bash -c "source /opt/ros/humble/setup.bash; cd /ros2_ws; colcon build"
 
 # add underlay and overlay workspace

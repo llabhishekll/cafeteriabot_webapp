@@ -7,7 +7,6 @@ services:
       - default
     environment:
       - "ROS_DOMAIN_ID=0"
-      - "RMW_IMPLEMENTATION=rmw_cyclonedds_cpp"
     ports:
       - "7000:7000"
       - "9090:9090"
