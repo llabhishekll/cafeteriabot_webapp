@@ -22,12 +22,12 @@ var app = new Vue({
     // parameters
     isParameterServiceBusy: false,
     parameters: {
-      maxDistance: { name: "detection01_node:max_distance", value: 0.0 },
-      minDistance: { name: "detection01_node:min_distance", value: 0.0 },
-      angleTolerance: { name: "detection01_node:angle_tolerance", value: 0 },
+      maxDistance: { name: "detection_node:max_distance", value: 0.0 },
+      minDistance: { name: "detection_node:min_distance", value: 0.0 },
+      angleTolerance: { name: "detection_node:angle_tolerance", value: 0 },
       maxPoints: { name: "clustering_node:max_points", value: 0 },
       minPoints: { name: "clustering_node:min_points", value: 0 },
-      markerDuration: { name: "detection01_node:marker_duration", value: 0 },
+      markerDuration: { name: "detection_node:marker_duration", value: 0 },
     },
 
     // position & movement
@@ -283,7 +283,7 @@ var app = new Vue({
           info: message.info,
           data: message.data,
         };
-        this.logMessage(10, `Received map data: ${message.info.height} x ${message.info.width}.`);
+        this.logMessage(0, `Received map data: ${message.info.height}x${message.info.width}.`);
 
         // draw map on canvas
         this.drawMapCanvas();
