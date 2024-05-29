@@ -221,7 +221,7 @@ var app = new Vue({
 
       topicRosout.subscribe((message) => {
         // list of nodes to include in the logs
-        const allowedNodes = ["rviz", "cafeteria_robot_control_node"];
+        const allowedNodes = ["cafeteria_robot_control_node"];
 
         if (allowedNodes.includes(message.name)) {
           // only log messages from specified nodes
@@ -232,7 +232,7 @@ var app = new Vue({
       // subscribe callback to odometry
       let topicOdometry = new ROSLIB.Topic({
         ros: this.ros,
-        name: "/odom",
+        name: "/cleaner_2/odom",
         messageType: "nav_msgs/msg/Odometry",
       });
 
@@ -243,7 +243,7 @@ var app = new Vue({
       // subscribe callback to velocity
       let topicVelocity = new ROSLIB.Topic({
         ros: this.ros,
-        name: "/diffbot_base_controller/cmd_vel_unstamped",
+        name: "/cleaner_2/cmd_vel",
         messageType: "geometry_msgs/msg/Twist",
       });
 
@@ -837,7 +837,7 @@ var app = new Vue({
     publishVelocity: function (x, z) {
       let velocity = new ROSLIB.Topic({
         ros: this.ros,
-        name: "/diffbot_base_controller/cmd_vel_unstamped",
+        name: "/cleaner_2/cmd_vel",
         messageType: "geometry_msgs/msg/Twist",
       });
       let message = new ROSLIB.Message({
