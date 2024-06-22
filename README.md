@@ -87,7 +87,7 @@ $ source ~/ros2_ws/install/setup.bash
 
 ## Launch
 
-![webapp](/Users/abhishekverma/Github/cafeteriabot_webapp/.assets/webapp.gif)
+![webapp](.assets/webapp.gif)
 
 The `cafeteriabot_webapp.launch.py` launch file contains the followings nodes:
 
