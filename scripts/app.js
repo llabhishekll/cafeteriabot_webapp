@@ -84,6 +84,8 @@ var app = new Vue({
       { name: "Patrol", command: "patrol" },
       { name: "Go Home", command: "drop_to_home" },
       { name: "Go Drop", command: "home_to_drop" },
+      { name: "Dock", command: "dock" },
+      { name: "Undock", command: "undock" },
       { name: "Stop", command: "stop" },
     ],
 
@@ -776,7 +778,7 @@ var app = new Vue({
 
       // define the service request
       let request = new ROSLIB.ServiceRequest({
-        command: "dock",
+        command: "action_dock",
       });
 
       // call the service and handle the response
@@ -806,7 +808,7 @@ var app = new Vue({
 
       // define the service request
       let request = new ROSLIB.ServiceRequest({
-        command: "cancel",
+        command: "action_cancel",
       });
 
       // call the service and handle the response
